@@ -20,19 +20,20 @@ int aggregate_height(int **focus)
 	}
 }
 
-int complete_lines(int **focus) 
+int complete_lines(int **focus)
 //this is essentailly copied over from the update tetris program
 {
-	for (int i = HEIGHT-1; i >= 0; i--) {
-		char row_found = 1;
-		for (int j = 0; j < WIDTH && row_found; j++)
-			row_found = focus[i][j] != 0;
-                if (!row_found)
-                        continue;
-
-		for (int k = i-1; k >= 0; k--) {
+	int total_lines = 0;
+	for (int i = 0; i < HEIGHT; i++) {
+		char found = 1;
+		for (int j = 0; j < WIDTH; j++) {
+			if (!focus[i][j])
+				found = 0;
+		}
+		if (found)
+			total_lines++;
 	}
-	return 0;
+	return total_lines;
 }
 
 int holes(int **focus)
@@ -52,7 +53,7 @@ int holes(int **focus)
 	int counter = 0;
 	for (int i = 0; i < HEIGHT; i++) {
 		for (int j = 0; j < WIDTH; j++) {
-			if (hole[i][j] && !board[i][j])	
+			if (hole[i][j] && !board[i][j])
 				counter++;
 		}
 	}
@@ -73,7 +74,7 @@ float get_penalty(organism nn, int **focus) //feedforward
 //for testing these functions here
 int main()
 {
-	int focus[HEIGHT][WIDTH] = {
+	int disp[HEIGHT][WIDTH] = {
 	{0,0,0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0},
@@ -93,8 +94,15 @@ int main()
 	{0,0,0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0}};
+
+	int **focus = (int**)malloc(sizeof(int*));
+	for (int i = 0; i < HEIGHT; i++) {
+		focus[i] = (int*)malloc(sizeof(int));
+		for (int j = 0; j < WIDTH; j++)
+			focus[i][j] = disp[i][j];
 	}
 	printf("%d\n", holes(focus));
 	return 0;
 }
+

@@ -29,6 +29,6 @@ extern int aggregate_height(int **focus);
 extern int complete_lines(int **focus);
 extern int holes(int **focus);
 extern int bumpiness(int **focus);
-extern int get_penalty(struct organism nn, int **focus); //feed forward neural network
+extern float get_penalty(struct organism nn, int **focus); //feed forward neural network
 
 #endif
