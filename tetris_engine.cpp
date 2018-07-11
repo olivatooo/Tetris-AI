@@ -5,16 +5,30 @@
 #include <math.h>
 #include <omp.h>
 #include <time.h>
+#include <unistd.h>
 #include "tetris_engine.hpp"
-#include "genetic.hpp" //we are going to contain neural network as well as other genetic
-                     //algorithm util subroutines
+#include "genetic.hpp"
+/*
+ * we are going to contain neural network as well as other genetic
+ * algorithm util subroutines
+ */
 using namespace std;
+const int HEIGHT = 22;
+const int WIDTH  = 10;
+const int DECISION_THRESHOLD = 4;
+//at least y is equal to this value before deciding moves
+
+int x, y;
+int type, next_type, otype;
+int score = 0, delay = 50;
+int **board; //this is the current board
+int rotate_cnt = 0, left_cnt = 0, right_cnt = 0;
+//here are the current moves that have to go underway
 
 void generate()
 {
 	type = next_type;
 	next_type = (int)(rand() % 7) + 1;
-
 	x = WIDTH / 2;
 	switch (type) {
 	case 1:
@@ -423,7 +437,7 @@ void rotate() //to keep things simple we have one type of rotate only
 			    safe(y+1, x)) {
 				clear(y-1, x-1, y, x+1);
 				board[y][x]   = 7;
-				board[y][x+1] = 7;board[y][x]   = 7;board[y][x]   = 7;
+				board[y][x+1] = 7;board[y][x] = 7; board[y][x] = 7;
 				board[y-1][x] = 7;
 				board[y+1][x] = 7;
 				otype = 17;
@@ -459,7 +473,7 @@ void update_tetris()
 			}
 			//add scoring guidelines here
 			update_tetris(); //continue searching for more
-			return ;
+			return;
 		}
 	}
 }
@@ -516,22 +530,27 @@ bool end_game_checker()
 
 void printb(int **board)
 {
-	for (int i = 0; i < WIDTH+2; i++)
-		printf("%c ", '#');
+	printf("+ ");
+	for (int i = 0; i < WIDTH; i++)
+		printf("%c ", '-');
+	printf("+");
 	printf("\n");
 	for (int i = 0; i < HEIGHT; i++) {
 		for (int j = 0; j < WIDTH+2; j++) {
-			if (j == 0 || j == WIDTH + 1 ||
-					board[i][j-1] != 0)
+			if (j == 0 || j == WIDTH + 1)
+				printf("%c ", '|');
+			else if (board[i][j-1])
 				printf("%c ", '#');
 			else
-				printf("%c ", '.');
+				printf("%c ", ' ');
 		}
 		printf("\n");
 	}
-	for (int i = 0; i < WIDTH+2; i++)
-		printf("%c ", '#');
-	printf("\n\n");
+	printf("+ ");
+	for (int i = 0; i < WIDTH; i++)
+		printf("%c ", '-');
+	printf("+ ");
+	printf("\n\n\n\n");
 }
 
 int** make_2darr(int h, int w)
@@ -581,40 +600,91 @@ void slam() //let block reach the bottom
         	update_board();
 }
 
-void choose_board() //TDO this this section of code right now
+void choose_moves()
 {
-	int **original = board;  //original board to copy off of
-	int **curr_best = board; //the best board so far
-	int min_penalty = 2140000000;
-	//lets first do left and right translation
-	for (int i = -WIDTH; i <= WIDTH; i++) {
-		//lets now do rotations
-		for (int j = 0; j <= 4; j++) {
-			int **new_board = deep_copyover(original);
-			for (int k = 0; k <= abs(i); k++) {
-				if (i < 0)
-					translate_left();
-				else if (i > 0)
-					translate_right();
-			}
-			for (int k = 0; k < j; k++)
+	int **curr_board = board; //this is going to be the original
+	int curr_y = y;
+	int curr_x = x;
+	double least_penalty = 0xFFFFF; //set pen to curr
+	char preview = 1;
+	//set everything to no moves as best
+	for (int i = 0; i < 4; i++) {
+		//choose  how many rotations from current state yield least penalty
+		for (int j = 0; j <= WIDTH; j++) {
+			//choose how many left shifts from current state yield least
+			board = deep_copyover(curr_board); //set board to new
+			y = curr_y;
+			x = curr_x;
+
+			for (int k = 0; k < i; k++)
 				rotate();
+			for (int k = 0; k < j; k++)
+				translate_left();
 			slam();
 
-			if (get_penalty(trained_nn, new_board) < min_penalty) {
-				min_penalty = get_penalty(trained_nn, new_board);
-				if (curr_best != original)
-					free_2darr(curr_best); //curr best is gone
-				curr_best = new_board;
-			} else { //curr_best stays
-				free_2darr(new_board);
+			double stackpen = get_penalty(trained_nn, board);
+			//penalty in this stack
+			if (stackpen < least_penalty) {
+				least_penalty = stackpen;
+				left_cnt   = j;
+				right_cnt  = 0;
+				rotate_cnt = i;
 			}
+			free_2darr(board); //free this board
 		}
+
+		for (int j = 0; j <= WIDTH; j++) {
+			//choose how many right shifts from current state yield least
+			board = deep_copyover(curr_board); //set board to new
+			y = curr_y;
+			x = curr_x;
+
+			for (int k = 0; k < i; k++)
+				rotate();
+			for (int k = 0; k < j; k++)
+				translate_right();
+			slam();
+
+			double stackpen = get_penalty(trained_nn, board);
+			//penalty in this stack
+			if (stackpen < least_penalty) {
+				least_penalty = stackpen;
+				right_cnt  = j;
+				left_cnt   = 0;
+				rotate_cnt = i;
+			}
+			free_2darr(board); //free this board
+		}
+
 	}
-	if (curr_best != original)
-		free_2darr(original);
-	board = curr_best;
-} //choose the board with the least penalty and set that as global
+
+	y     = curr_y;
+	x     = curr_x;
+	board = curr_board; //set back to old board
+}
+
+void do_move()
+{
+	//printf("%d %d %d\n", right_cnt, left_cnt, rotate_cnt);
+	//fflush(stdout);
+	if (rotate_cnt > 0) {
+		rotate();
+		rotate_cnt--;
+	} else if (right_cnt > 0) {
+		translate_right();
+		right_cnt--;
+	} else if (left_cnt > 0) {
+		translate_left();
+		left_cnt--;
+	}
+}
+
+void reset_move_var()
+{
+	left_cnt   = 0;
+	right_cnt  = 0;
+	rotate_cnt = 0;
+}
 
 int main()
 {
@@ -625,18 +695,23 @@ int main()
 	generate();
 	while (!end_game_checker()) {
 		bool spawn = update_board();
-		coil_whine(5000);
+		usleep(35000);
 		if (spawn && check_board()) {
 			freeze();
 			update_tetris();
 			generate();
+			reset_move_var(); //reset the action variables (left, right, rotate)
 		}
+		if (y == DECISION_THRESHOLD)
+			choose_moves();
+		do_move();
 		printb(board);
 	}
 	free_2darr(board);
 	return 0;
 }
 
+/*
 int main()
 {
 	int disp[HEIGHT][WIDTH] = {
@@ -658,16 +733,19 @@ int main()
 	{0,0,0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0}};
+	{0,0,0,0,0,0,0,1,0,0},
+	{1,1,1,1,1,1,1,1,1,1},
+	{0,0,1,1,0,1,0,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1}};
 
-	int **focus = (int**)malloc(sizeof(int*));
+	int **focus = (int**)malloc(sizeof(int*) * HEIGHT);
 	for (int i = 0; i < HEIGHT; i++) {
-		focus[i] = (int*)malloc(sizeof(int));
+		focus[i] = (int*)malloc(sizeof(int) * WIDTH);
 		for (int j = 0; j < WIDTH; j++)
 			focus[i][j] = disp[i][j];
 	}
+	fflush(stdout);
 	printf("%d\n", holes(focus));
 	return 0;
-}
+}*/
 
