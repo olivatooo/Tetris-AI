@@ -9,6 +9,7 @@ cd Tetris-AI
 If you wish to train the AI from scratch,
 ```
 make train
+./train
 ```
 Otherwise skip the step above since I already have a pre-trained model
 ## Run the AI
