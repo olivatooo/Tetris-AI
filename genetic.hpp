@@ -1,12 +1,7 @@
 #ifndef genetic
 #define genetic
 
-#define RAND ((double) rand() / RAND_MAX)
-
-extern const int INIT_POPULATION = 5000,
-	  	  SAMPLE_SIZE 	  = 10;
-
-extern const float MUTATION_RATE = ;
+#define RAND (((double) rand() / RAND_MAX) * 2 - 1) //between -1 and 1
 
 /*
  * so the way we set up the genetic algorithm is by optimizing a penalty calculater,
@@ -30,14 +25,16 @@ struct organism {                 //this is a neural network
         double a, b, c, d, fitness; //a,b,c,d are genes
 };
 
-extern organism *population, trained_nn, *best_in_each_gen;
+extern organism *population, trained_nn, best_in_gen;
 extern const int INIT_POPULATION, SAMPLE_SIZE;
+extern const float MUTATION_RATE;
 
 //some functions for genetic alg
 void init_population();
 void print_sample_population();
-void cross_over(organism a, organism b,
-		organism *child1, organism *child2)
+void crossover(organism *a, organism *b,
+		organism *child1, organism *child2);
+void mutate(organism *child);
 
 int aggregate_height(int **focus);
 int complete_lines(int **focus);

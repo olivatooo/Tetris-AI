@@ -1,8 +1,8 @@
 Default:
-	you need to choose either train(model) or run(model)
 
 train:
-	g++ train.cpp genetic.cpp tetris_engine.cpp -o main
+	g++ train.cpp tetris_engine.cpp genetic.cpp -o train
 
 run:
-	g++ tetris_engine.cpp genetic.cpp -o main
+	g++ run.cpp tetris_engine.cpp genetic.cpp -o run
+

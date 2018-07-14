@@ -8,14 +8,15 @@
 #include <unistd.h>
 #include "tetris_engine.hpp"
 #include "genetic.hpp"
+#include "train.hpp"
 /*
  * we are going to contain neural network as well as other genetic
  * algorithm util subroutines
  */
 using namespace std;
-const int HEIGHT = 22;
+const int HEIGHT = 24;
 const int WIDTH  = 10;
-const int DECISION_THRESHOLD = 4;
+const int DECISION_THRESHOLD = 3;
 //at least y is equal to this value before deciding moves
 
 int x, y;
@@ -459,7 +460,7 @@ void rotate() //to keep things simple we have one type of rotate only
 	}
 }
 
-void update_tetris()
+int update_tetris()
 {
 	//look for completed line(s)
 	for (int i = HEIGHT-1; i >= 0; i--) {
@@ -471,11 +472,10 @@ void update_tetris()
 				for (int m = 0; m < WIDTH; m++)
 					board[k+1][m] = board[k][m];
 			}
-			//add scoring guidelines here
-			update_tetris(); //continue searching for more
-			return;
+			return 1 + update_tetris(); //continue searching for more
 		}
 	}
+	return 0;
 }
 
 bool check_board()
@@ -599,8 +599,8 @@ void slam() //let block reach the bottom
 	while (!check_board())
         	update_board();
 }
-
-void choose_moves()
+//this is going to be our minimax algorithm
+void choose_moves(organism nn)
 {
 	int **curr_board = board; //this is going to be the original
 	int curr_y = y;
@@ -622,7 +622,7 @@ void choose_moves()
 				translate_left();
 			slam();
 
-			double stackpen = get_penalty(trained_nn, board);
+			double stackpen = get_penalty(nn, board); //here we choose what nn to use for our penalty calculation
 			//penalty in this stack
 			if (stackpen < least_penalty) {
 				least_penalty = stackpen;
@@ -645,7 +645,7 @@ void choose_moves()
 				translate_right();
 			slam();
 
-			double stackpen = get_penalty(trained_nn, board);
+			double stackpen = get_penalty(nn, board);
 			//penalty in this stack
 			if (stackpen < least_penalty) {
 				least_penalty = stackpen;
@@ -657,7 +657,6 @@ void choose_moves()
 		}
 
 	}
-
 	y     = curr_y;
 	x     = curr_x;
 	board = curr_board; //set back to old board
@@ -685,67 +684,4 @@ void reset_move_var()
 	right_cnt  = 0;
 	rotate_cnt = 0;
 }
-
-int main()
-{
-	srand(time(NULL));
-	next_type = rand() % 7 + 1;
-	board = make_2darr(HEIGHT, WIDTH);
-
-	generate();
-	while (!end_game_checker()) {
-		bool spawn = update_board();
-		usleep(35000);
-		if (spawn && check_board()) {
-			freeze();
-			update_tetris();
-			generate();
-			reset_move_var(); //reset the action variables (left, right, rotate)
-		}
-		if (y == DECISION_THRESHOLD)
-			choose_moves();
-		do_move();
-		printb(board);
-	}
-	free_2darr(board);
-	return 0;
-}
-
-/*
-int main()
-{
-	int disp[HEIGHT][WIDTH] = {
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,1,0,0},
-	{1,1,1,1,1,1,1,1,1,1},
-	{0,0,1,1,0,1,0,1,1,1},
-	{1,1,1,1,1,1,1,1,1,1}};
-
-	int **focus = (int**)malloc(sizeof(int*) * HEIGHT);
-	for (int i = 0; i < HEIGHT; i++) {
-		focus[i] = (int*)malloc(sizeof(int) * WIDTH);
-		for (int j = 0; j < WIDTH; j++)
-			focus[i][j] = disp[i][j];
-	}
-	fflush(stdout);
-	printf("%d\n", holes(focus));
-	return 0;
-}*/
 

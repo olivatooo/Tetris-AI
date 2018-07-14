@@ -5,19 +5,20 @@
 #include "genetic.hpp"
 #include "tetris_engine.hpp"
 
-const int INIT_POPULATION = 5000,
-	  	  SAMPLE_SIZE 	  = 10;
+const int INIT_POPULATION = 1024, //always halve, first half is inherited, second half is introduction
+	  	  	  SAMPLE_SIZE = 10;
+const float MUTATION_RATE = 0.15f;
+// a couple sample organisms. as you can see they are actually quite unique
+// organism trained_nn = (organism) {0.510066, -0.760666, 0.35663, 0.19448, 100};
+organism trained_nn = (organism) {0.619062, -0.283929, 0.042984, 0.090992, 0};
 
-const float MUTATION_RATE = ;
-//sample size is how much we should be printing
-organism trained_nn = (organism) {0.510066, -0.760666, 0.35663, 0.19448, 69};
 /*
  * the above organism is a pre-trained value we are using as reference
- * we should actually read this from file, this is actually a pre-trained value rn,
- * this is actually an example. we should keep the best organisms in
- * an array of vecs. don't forget 69 is just an arbitrary value I placed for fitness
+ * this is actually an example. we should keep the best organisms in a list
+ * more importantly pay close attention to the variables below
  */
-organism *population; //don't forget to free the population that got elim
+
+organism *population;  //don't forget to free the population that got elim
 organism  best_in_gen; //keep track of fittest individual in each gen and write it out to a file after
 
 void init_population()
@@ -32,28 +33,32 @@ void init_population()
 void print_sample_population()
 {
 	for (int i = 0; i < SAMPLE_SIZE; i++) {
-		printf("individual %d: %f, %f, %f, %f\n", i+1, population[i].a,
-			population[i].b, population[i].c, population[i].d);
+		printf("individual %d: %f, %f, %f, %f, %f\n", i+1, population[i].a,
+				population[i].b, population[i].c,
+				population[i].d, population[i].fitness);
 	}
 }
 
-void crossover(organism a, organism b,
+void crossover(organism *a, organism *b,
 		organism *child1, organism *child2) //aka scramble child genes
 {
-	child1.a = a.a; // <----+
-	child1.b = a.b; //      |
-	child1.c = b.c; //      |
-	child1.d = b.d; // <---+|
+	child1->a = a->a; // <----+
+	child1->b = a->b; //      |
+	child1->c = b->c; //      |
+	child1->d = b->d; // <---+|
 					//     ||
-	child2.a = b.a; // <---+|
-	child2.b = b.b; //      |
-	child2.c = a.c; //      |
-	child2.d = a.d; // <----+
+	child2->a = b->a; // <---+|
+	child2->b = b->b; //      |
+	child2->c = a->c; //      |
+	child2->d = a->d; // <----+
 }
 
 void mutate(organism *child)
 {
-	
+	child->a += (RAND * MUTATION_RATE) * child->a;
+	child->b += (RAND * MUTATION_RATE) * child->b;
+	child->c += (RAND * MUTATION_RATE) * child->c;
+	child->d += (RAND * MUTATION_RATE) * child->d;
 }
 
 //===== here begins the penalty calculations for the individual
