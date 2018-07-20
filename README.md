@@ -9,11 +9,11 @@ cd Tetris-AI
 If you wish to train the AI from scratch,
 ```
 make train
-./train
+./bin/train
 ```
 Otherwise skip the step above since I already have a pre-trained model
-## Run the AI
+## Run the AI (Optional: pick parameter from parameter-hist)
 ```
 make run
-./run
+./bin/run
 ```
