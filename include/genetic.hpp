@@ -22,24 +22,33 @@
 
 typedef struct organism organism; //make my life easier
 struct organism {                 //this is a neural network
-        double a, b, c, d, fitness; //a,b,c,d are genes
+        double a, b, c, d, e, f, g;
+		int fitness;
 };
 
-extern organism *population, trained_nn, best_in_gen;
-extern const int INIT_POPULATION, SAMPLE_SIZE;
-extern const float MUTATION_RATE;
+extern const double MUTATION_RATE;
+extern const int	INIT_POPULATION, SAMPLE_SIZE;
+extern organism     *population, trained_nn, best_in_gen;
 
 //some functions for genetic alg
 void init_population();
 void print_sample_population();
-void crossover(organism *a, organism *b,
-		organism *child1, organism *child2);
+
+void crossover(const organism a, const organism b,
+		organism *child1);
+
+void weighted_crossover(const organism par_a, const organism par_b,
+		organism *child);
+
 void mutate(organism *child);
 
 int aggregate_height(int **focus);
 int complete_lines(int **focus);
 int holes(int **focus);
 int bumpiness(int **focus);
+int bottom_wall(int **focus);
+int right_wall(int **focus);
+int left_wall(int **focus);
 double get_penalty(struct organism nn, int **focus); //feed forward neural network
 
 #endif

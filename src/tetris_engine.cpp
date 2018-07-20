@@ -6,22 +6,22 @@
 #include <omp.h>
 #include <time.h>
 #include <unistd.h>
-#include "tetris_engine.hpp"
-#include "genetic.hpp"
-#include "train.hpp"
+#include "../include/tetris_engine.hpp"
+#include "../include/genetic.hpp"
+#include "../include/train.hpp"
 /*
  * we are going to contain neural network as well as other genetic
  * algorithm util subroutines
  */
 using namespace std;
-const int HEIGHT = 24;
+const int HEIGHT = 28;
 const int WIDTH  = 10;
-const int DECISION_THRESHOLD = 3;
+const int DECISION_THRESHOLD = 4;
 //at least y is equal to this value before deciding moves
 
 int x, y;
 int type, next_type, otype;
-int score = 0, delay = 50;
+int score = 0, delay = 50, lines_completed = 0;
 int **board; //this is the current board
 int rotate_cnt = 0, left_cnt = 0, right_cnt = 0;
 //here are the current moves that have to go underway
@@ -460,7 +460,7 @@ void rotate() //to keep things simple we have one type of rotate only
 	}
 }
 
-int update_tetris()
+void update_tetris()
 {
 	//look for completed line(s)
 	for (int i = HEIGHT-1; i >= 0; i--) {
@@ -472,10 +472,10 @@ int update_tetris()
 				for (int m = 0; m < WIDTH; m++)
 					board[k+1][m] = board[k][m];
 			}
-			return 1 + update_tetris(); //continue searching for more
+			lines_completed++;
+			update_tetris(); //continue searching for more
 		}
 	}
-	return 0;
 }
 
 bool check_board()
@@ -549,7 +549,7 @@ void printb(int **board)
 	printf("+ ");
 	for (int i = 0; i < WIDTH; i++)
 		printf("%c ", '-');
-	printf("+ ");
+	printf("+ "); printf(" lines: %d", lines_completed);
 	printf("\n\n\n\n");
 }
 
@@ -561,18 +561,6 @@ int** make_2darr(int h, int w)
 		memset(ret[i], 0, sizeof(int) * w);
 	}
 	return ret;
-}
-
-char coil_whine(int n) //fuck c++ delays write a coil whiner
-{
-	for (int i = 0; i < n*n; i++) {
-		int b = 6;
-		int c = 9;
-		int a = b + c;
-		b += a + c;
-		c += a + b;
-		a /= 2;
-	}
 }
 
 int** deep_copyover(int **original)

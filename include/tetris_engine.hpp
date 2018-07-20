@@ -1,6 +1,5 @@
 #ifndef tetris_engine
 #define tetris_engine
-
 #include "genetic.hpp"
 
 extern const int DECISION_THRESHOLD;
@@ -12,16 +11,18 @@ extern int type, next_type, otype;
 extern int score, delay;
 extern int **board; //this is the current board
 extern int rotate_cnt, left_cnt, right_cnt;
+extern int lines_completed;
 
 void generate();
 void translate_right();
 void translate_left();
+void slam();
 
 char safe(int y, int x);
 void clear(int y1, int x1, int y2, int x2);
 void rotate();
 
-int  update_tetris();
+void  update_tetris();
 bool update_board();
 bool check_board();
 void freeze();
