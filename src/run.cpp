@@ -7,8 +7,8 @@
 #include <omp.h>
 #include <time.h>
 #include <unistd.h>
-#include "../include/tetris_engine.hpp"
-#include "../include/genetic.hpp"
+#include "../include/tetris_engine.h"
+#include "../include/genetic.h"
 #define ts(s) to_string(s)
 using namespace std;
 

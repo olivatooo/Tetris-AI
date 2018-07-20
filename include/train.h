@@ -1,6 +1,6 @@
 #ifndef train
 #define train
-#include "tetris_engine.hpp"
+#include "tetris_engine.h"
 
 extern const int PLACE_LIM; //the number of block placements per game
 extern const int TOTAL_GENERATIONS;

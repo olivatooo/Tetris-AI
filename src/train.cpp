@@ -7,9 +7,9 @@
 #include <fstream>
 #include <omp.h>
 #include <unistd.h>
-#include "../include/tetris_engine.hpp"
-#include "../include/genetic.hpp"
-#include "../include/train.hpp"
+#include "../include/tetris_engine.h"
+#include "../include/genetic.h"
+#include "../include/train.h"
 using namespace std;
 
 organism the_best_tetris_player = (struct organism) {0, 0, 0, 0, 0, 0, 0, 0};

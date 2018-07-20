@@ -1,6 +1,6 @@
 #ifndef tetris_engine
 #define tetris_engine
-#include "genetic.hpp"
+#include "genetic.h"
 
 extern const int DECISION_THRESHOLD;
 extern const int HEIGHT;
