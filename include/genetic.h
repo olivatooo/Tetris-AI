@@ -23,11 +23,11 @@
 typedef struct organism organism; //make my life easier
 struct organism {                 //this is a neural network
         double a, b, c, d, e, f, g;
-		int fitness;
+        int fitness;
 };
 
 extern const double MUTATION_RATE;
-extern const int	INIT_POPULATION, SAMPLE_SIZE;
+extern const int    INIT_POPULATION, SAMPLE_SIZE;
 extern organism     *population, trained_nn, best_in_gen;
 
 //some functions for genetic alg
@@ -35,10 +35,10 @@ void init_population();
 void print_sample_population();
 
 void crossover(const organism a, const organism b,
-		organism *child1);
+        organism *child1);
 
 void weighted_crossover(const organism par_a, const organism par_b,
-		organism *child);
+        organism *child);
 
 void mutate(organism *child);
 
