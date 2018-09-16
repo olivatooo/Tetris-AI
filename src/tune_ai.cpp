@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "../include/genetic.h"
-#include "../include/tetris_engine.h"
-#include "../include/train.h"
+#include "../include/genetic.hpp"
+#include "../include/tetris_engine.hpp"
+#include "../include/train.hpp"
 using namespace std;
 //our current champion genes: 0.520401 0.066064 0.358904 0.217230 -0.010198 -0.077927 -0.196434
 const double incre1 = 0.2; //we can play around with different tuning increments

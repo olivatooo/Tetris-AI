@@ -6,9 +6,9 @@
 #include <omp.h>
 #include <time.h>
 #include <unistd.h>
-#include "../include/tetris_engine.h"
-#include "../include/genetic.h"
-#include "../include/train.h"
+#include "../include/tetris_engine.hpp"
+#include "../include/genetic.hpp"
+#include "../include/train.hpp"
 /*
  * we are going to contain neural network as well as other genetic
  * algorithm util subroutines
