@@ -19,4 +19,4 @@ Otherwise skip the step above since I already have a pre-trained model
 make run
 ./bin/run
 ```
-![Alt Text](https://github.com/alexshi0000/Tetris-AI/blob/master/doc/demo.gif)
+<div style="text-align:center"><img src ="https://github.com/alexshi0000/Tetris-AI/blob/master/doc/demo.gif" /></div>
