@@ -13,7 +13,7 @@ make train
 ```
 <div style="text-align:center"><img src ="https://github.com/alexshi0000/Tetris-AI/blob/master/doc/2018-07-16-153407_1600x900_scrot.png" /></div>
 
-Otherwise skip the step above since I already have a pre-trained model
+Otherwise skip the step above since I already have a pre-trained model included
 ## Run the AI (Optional: pick parameter from parameter-hist)
 ```
 make run
@@ -22,3 +22,4 @@ make run
 <p align="center"> 
 <img src="https://github.com/alexshi0000/Tetris-AI/blob/master/doc/demo.gif">
 </p>
+You should see something like __this__
