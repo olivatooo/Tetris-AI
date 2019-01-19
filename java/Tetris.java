@@ -5,80 +5,13 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class Tetris {
-        /*
-         * ====================== DOCUMENTATION =========================
-         *  game mechanics:
-         * - let  > 0 represent active blocks
-         * - let  < 0 represent dead blocks
-         * - let  0   represent empty
-         *
-         * - after a tetris occurs just move all the dead blocks
-         *   for n amount according to how many lines were cleared
-         *   pieces with area blocking should be ignored
-         *
-         * pieces:
-         * 1 L
-         * 2 J (mirror L)
-         * 3 Z
-         * 4 Y (mirror Z)
-         * 5 O
-         * 6 I
-         * 7 T
-         *
-         * visual representation:
-         *
-         * [ ]
-         * [x]
-         * [ ][ ]
-         *
-         *
-         *    [ ]
-         *    [x]
-         * [ ][ ]
-         *
-         *
-         * [ ][X]
-         *    [ ][ ]
-         *
-         *
-         *    [X][ ]
-         * [ ][ ]
-         *
-         *
-         * [X][ ]
-         * [ ][ ]
-         *
-         *
-         * [ ][X][ ][ ]
-         *
-         *
-         * [ ][X][ ]
-         *    [ ]
-         *
-         * rotation notes:
-         * - we need to set up a rotation grid of at least 5x5
-         *
-         * tetris notes:
-         * - just remove the dead stuff
-         *
-         * HUD lookup
-         *
-         * [ ][ ][ ][ ][ ] 5x5 cell
-         * [ ][ ][ ][ ][ ]
-         * [ ][ ][ ][ ][ ]
-         * [ ][ ][ ][ ][ ]
-         * [ ][ ][ ][ ][ ]
-         */
-
         public static String HIGHSCORE_DAT = "highscores.dat";
         public static final int HEIGHT = 22, //top two are not playing area
                                 WIDTH  = 10,
                                 HIGH_SCORE_BOARD_SIZE = 7;
-
         public static int x, y, type, nextType, level = 0, score = 0, delay = 500; //same as speed;
         public static int[][] board;
         public static int[] highscores;
-
         public static void generate() {
                 type = nextType;
                 nextType = (int)(Math.random() * 7 + 1);
@@ -139,7 +72,6 @@ public class Tetris {
                         break;
                 }
         }
-
         /*
          * for the translation subroutines do the same thing we did in the update board
          * where we first checked then moved the blocks
@@ -166,7 +98,6 @@ public class Tetris {
                 }
                 x++;
         }
-
         public static void translateLeft() {
                 boolean ret = false;
                 for (int i = 0; i < HEIGHT; i++) {
@@ -188,11 +119,9 @@ public class Tetris {
                 }
                 x--;
         }
-
         public static boolean safe(int y, int x) {
                 return y >= 0 && y < HEIGHT && x >= 0 && x < WIDTH && board[y][x] >= 0;
         }
-
         public static void clearRect(int y1, int x1, int y2, int x2) { //use this to clear for rotation
                 for (int i = y1; i <= y2; i++) {
                         for (int j = x1; j <= x2; j++) {
@@ -201,7 +130,6 @@ public class Tetris {
                         }
                 }
         }
-
         public static void rotate() {
                 try {
                         switch (type) {
@@ -911,22 +839,8 @@ public class Tetris {
                                 level = 9;
                                 delay = 100;
                         }
-                        if (elapsedTime >  320000) {
-                                level = 10;
-                                delay = 85;
-                        }
-                        if (elapsedTime >  390000) {
-                                level = 11;
-                                delay = 70;
-                        }
-                        if (elapsedTime >  480000) {
-                                level = 12;
-                                delay = 55;
-                        }
-
                         Gui.refresh();
                 }
-
                 exportHighScores();
                 Gui.removeKeyListener(); //end game, instead of disposing window
                 Gui.window.removeAll();

@@ -12,7 +12,75 @@
 /*
  * we are going to contain neural network as well as other genetic
  * algorithm util subroutines
+ *
+ * TODO: link algorithm with java GUI
  */
+
+/*
+ * ====================== DOCUMENTATION =========================
+ *  game mechanics:
+ * - let  > 0 represent active blocks
+ * - let  < 0 represent dead blocks
+ * - let  0   represent empty
+ *
+ * - after a tetris occurs just move all the dead blocks
+ *   for n amount according to how many lines were cleared
+ *   pieces with area blocking should be ignored
+ *
+ * pieces:
+ * 1 L
+ * 2 J (mirror L)
+ * 3 Z
+ * 4 Y (mirror Z)
+ * 5 O
+ * 6 I
+ * 7 T
+ *
+ * visual representation:
+ *
+ * [ ]
+ * [x]
+ * [ ][ ]
+ *
+ *
+ *    [ ]
+ *    [x]
+ * [ ][ ]
+ *
+ *
+ * [ ][X]
+ *    [ ][ ]
+ *
+ *
+ *    [X][ ]
+ * [ ][ ]
+ *
+ *
+ * [X][ ]
+ * [ ][ ]
+ *
+ *
+ * [ ][X][ ][ ]
+ *
+ *
+ * [ ][X][ ]
+ *    [ ]
+ *
+ * rotation notes:
+ * - we need to set up a rotation grid of at least 5x5
+ *
+ * tetris notes:
+ * - just remove the dead stuff
+ *
+ * HUD lookup
+ *
+ * [ ][ ][ ][ ][ ] 5x5 cell
+ * [ ][ ][ ][ ][ ]
+ * [ ][ ][ ][ ][ ]
+ * [ ][ ][ ][ ][ ]
+ * [ ][ ][ ][ ][ ]
+ */
+
 using namespace std;
 const int HEIGHT = 28;
 const int WIDTH  = 10;
