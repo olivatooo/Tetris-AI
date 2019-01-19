@@ -31,7 +31,7 @@ int main()
     generate();
     while (!end_game_checker()) {
         bool spawn = update_board();
-        usleep(30000);
+        usleep(50000);
         if (spawn && check_board()) {
             freeze();
             update_tetris();
