@@ -22,3 +22,8 @@ make run
 <p align="center"> 
 <img src="https://github.com/alexshi0000/Tetris-AI/blob/master/doc/demo.gif">
 </p>
+
+### Next Steps: Integrate with Java GUI
+<p align="center"> 
+<img src="https://github.com/alexshi0000/Tetris-AI/blob/master/doc/tetris_gui.gif">
+</p>
