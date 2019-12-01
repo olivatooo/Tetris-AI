@@ -6,7 +6,7 @@
 #include "../include/genetic.hpp"
 #include <cstdlib>
 #include <cstring>
-#include <stdio.h>
+#include <cstdio>
 
 
 const int HEIGHT = 18;
@@ -581,7 +581,6 @@ void Tetris::choose_moves(organism nn)
     int curr_y = y;
     int curr_x = x;
     double least_penalty = 0xFFFFF; //set pen to curr
-    char preview = 1;
     //set everything to no moves as best
     for (int i = 0; i < 4; i++) {
         //choose  how many rotations from current state yield least penalty

@@ -20,7 +20,7 @@
  * - bumpiness is the absolute difference from each of the adjacent columns
  */
 
-typedef struct organism organism; //make my life easier
+typedef struct organism organism;
 struct organism {                 //this is a neural network
         double a, b, c, d, e, f, g;
         int fitness;
@@ -28,17 +28,13 @@ struct organism {                 //this is a neural network
 
 extern const double MUTATION_RATE;
 extern const int    INIT_POPULATION, SAMPLE_SIZE;
-extern organism     *population, trained_nn, best_in_gen;
+extern organism     *population;
 
-//some functions for genetic alg
+
 void init_population();
 void print_sample_population();
 
-void crossover(const organism a, const organism b,
-        organism *child1);
-
-void weighted_crossover(const organism par_a, const organism par_b,
-        organism *child);
+void weighted_crossover(const organism par_a, const organism par_b, organism *child);
 
 void mutate(organism *child);
 
@@ -46,7 +42,6 @@ int aggregate_height(int **focus);
 int complete_lines(int **focus);
 int holes(int **focus);
 int bumpiness(int **focus);
-int bottom_wall(int **focus);
 int right_wall(int **focus);
 int left_wall(int **focus);
 double get_penalty(struct organism nn, int **focus); //feed forward neural network

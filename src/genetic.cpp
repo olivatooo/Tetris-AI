@@ -1,8 +1,7 @@
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
 #include <ctime>
-#include <math.h>
 #include "../include/genetic.hpp"
 #include "../include/Tetris.h"
 
@@ -18,7 +17,6 @@ const double MUTATION_RATE = 0.015f;
  */
 
 organism *population;  //don't forget to free the population that got elim
-organism  best_in_gen; //keep track of fittest individual in each gen and write it out to a file after
 
 void init_population()
 {
@@ -135,14 +133,6 @@ int bumpiness(int **focus)
     return bumpiness;
 }
 
-int bottom_wall(int **focus)
-{
-    int cntr = 0;
-    for (int i = 0; i < WIDTH; i++)
-        cntr += (int) (focus[HEIGHT-1][i] == 1 ? 1 : 0);
-    return cntr;
-}
-
 int right_wall(int **focus)
 {
     int cntr = 0;
@@ -174,7 +164,7 @@ int max_height(int **focus)
     return ret;
 }
 
-double get_penalty(organism nn, int **focus) //feedforward
+double get_penalty(organism nn, int **focus)
 {
     return nn.b  * complete_lines(focus)+ nn.a * aggregate_height(focus) +
             nn.c * holes(focus)         + nn.d * bumpiness(focus)        +

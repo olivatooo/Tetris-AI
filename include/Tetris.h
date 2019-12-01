@@ -12,14 +12,11 @@ extern const int WIDTH;
 
 class Tetris {
     public:
-        const int DECISION_THRESHOLD = 4;
         int x;
         int y;
         int type;
-        int next_type;
         int otype;
-        int score = 0;
-        int delay = 50;
+        int next_type;
         int lines_completed = 0;
         int **board;
         int rotate_cnt = 0;
@@ -44,7 +41,6 @@ class Tetris {
         void  printb(int **board);
         int** make_2darr(int h, int w);
 
-        char  coil_whine(int n);
         int** deep_copyover(int **original);
         void  free_2darr(int **ptr);
 

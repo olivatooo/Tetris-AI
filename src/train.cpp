@@ -1,12 +1,11 @@
 #include <iostream>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
 #include <fstream>
 #include <omp.h>
 #include "../include/genetic.hpp"
 #include "../include/train.hpp"
-#include "../include/Tetris.h"
 
 using namespace std;
 
@@ -14,7 +13,7 @@ organism the_best_tetris_player = (struct organism) {0, 0, 0, 0, 0, 0, 0, 0};
 
 const int PLACE_LIM         = 1000,
           TOTAL_GENERATIONS = 5,
-          GAMES_PER_ORG     = 50,
+          GAMES_PER_ORG     = 5,
           LINE_TH           = 0;
 
 void reset_game(Tetris * t)
@@ -22,11 +21,9 @@ void reset_game(Tetris * t)
     t->rotate_cnt = 0;
     t->left_cnt   = 0;
     t->right_cnt  = 0;
-    t->score      = 0;
     t->x         = -1;
     t->y         = -1;
     t->next_type = -1;
-    t->otype     = -1;
     t->type      = -1;
 }
 
@@ -68,9 +65,9 @@ void print_train_info(int id, int gen)
      *
      * we can also allow the print_board method to print
      */
-    std::cout << "gener: " << gen << std::endl;
-    std::cout << "idivi: " << id << std::endl;
-    std::cout << "genes: "    <<
+    std::cout << std::endl << "Generation: " << gen << std::endl;
+    std::cout << "ID: " << id << std::endl;
+    std::cout << "Genes: "    <<
             population[id].a << " " <<
             population[id].b << " " <<
             population[id].c << " " <<
@@ -78,7 +75,7 @@ void print_train_info(int id, int gen)
             population[id].e << " " <<
             population[id].f << " " <<
             population[id].g << std::endl;
-    std::cout << "fitns: " << population[id].fitness << std::endl;
+    std::cout << "fitness: " << population[id].fitness << std::endl;
     std::cout << std::endl;
 }
 
@@ -93,7 +90,6 @@ void sort_population()
             }
         }
     }
-    best_in_gen = population[0];
 }
 
 void reproduce()
@@ -129,7 +125,7 @@ void reproduce()
 
 int main()
 {
-    srand(time(NULL));
+    srand(time(nullptr));
     init_population();
     std::cout << "OUR INIT POPULATION:" << std::endl;
     print_sample_population();
@@ -138,6 +134,7 @@ int main()
         #pragma omp parallel for private(i)
         for (int j = 0; j < INIT_POPULATION; j++) {
             int tid = omp_get_thread_num();
+            cout << "Processor (" << tid << ") running";
             int id  = j;
             int gen = i;
             Tetris t;
@@ -155,14 +152,13 @@ int main()
                 if (t.lines_completed <= LINE_TH)
                     break;
             }
-
             //do cleanup after placing the pieces for this organism
             adjust_fitness(&t, id);
-            // print_train_info(id, gen);
+            print_train_info(id, gen);
             fflush(stdout);
         }
         //sort by fitness and reproduce here. introduce new genes
-        std::cout << "GENERATION: " << i << std::endl;
+        std::cout << std::endl << "GENERATION: " << i << std::endl;
         sort_population();
         print_sample_population();
         //after sort compare if we have beaten the best player

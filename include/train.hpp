@@ -6,7 +6,7 @@ extern const int TOTAL_GENERATIONS;
 extern const int GAMES_PER_ORG;
 
 extern int placements; //lets use this as fitness measurement
-extern short gen, id, rank;
+extern short rank;
 
 void reset_game(Tetris * t);
 void adjust_fitness(Tetris * t, int id);
