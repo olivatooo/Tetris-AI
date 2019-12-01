@@ -1,4 +1,4 @@
-# Tetris-AI
+# Parallel Tetris-AI
 Tetris engine and AI using a genetic algorithm
 <br>
 ## Reproduce Results
