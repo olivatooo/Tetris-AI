@@ -4,7 +4,8 @@
 #include <ctime>
 #include <math.h>
 #include "../include/genetic.hpp"
-#include "../include/tetris_engine.hpp"
+#include "../include/Tetris.h"
+
 using namespace std;
 const int  INIT_POPULATION = 1024, //one part reproduce, one part introduced
                SAMPLE_SIZE = 10;

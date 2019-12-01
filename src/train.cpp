@@ -2,67 +2,63 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
-#include <string.h>
 #include <fstream>
 #include <omp.h>
-#include <unistd.h>
-#include "../include/tetris_engine.hpp"
 #include "../include/genetic.hpp"
 #include "../include/train.hpp"
+#include "../include/Tetris.h"
+
 using namespace std;
 
 organism the_best_tetris_player = (struct organism) {0, 0, 0, 0, 0, 0, 0, 0};
-int placements;
-short gen, id, rank;
+
 const int PLACE_LIM         = 1000,
           TOTAL_GENERATIONS = 5,
           GAMES_PER_ORG     = 50,
           LINE_TH           = 0;
 
-void reset_game()
+void reset_game(Tetris * t)
 {
-    rotate_cnt = 0;
-    left_cnt   = 0;
-    right_cnt  = 0;
-    score      = 0;
-    placements = 0;
-    x         = -1;
-    y         = -1;
-    next_type = -1;
-    otype     = -1;
-    type      = -1;
+    t->rotate_cnt = 0;
+    t->left_cnt   = 0;
+    t->right_cnt  = 0;
+    t->score      = 0;
+    t->x         = -1;
+    t->y         = -1;
+    t->next_type = -1;
+    t->otype     = -1;
+    t->type      = -1;
 }
 
-void adjust_fitness()
+void adjust_fitness(Tetris * t, int id)
 {
-    population[id].fitness = lines_completed;
+    population[id].fitness = t->lines_completed;
 }
 
-void place_pieces(organism indiv)
+void place_pieces(Tetris * t, organism indiv)
 {
-    reset_game();
-    next_type = rand() % 7 + 1;
-    board = make_2darr(HEIGHT, WIDTH); //creating our game board
-    generate();
-    while (!end_game_checker() && placements <= PLACE_LIM) {
-        bool spawn = update_board();
-        if (spawn && check_board()) {
-            freeze();
-            update_tetris();
-            generate();
-            reset_move_var();
+    int placements = 0;
+    reset_game(t);
+    t->next_type = rand() % 7 + 1;
+    t->board = t->make_2darr(HEIGHT, WIDTH); //creating our game board
+    t->generate();
+    while (!t->end_game_checker() && placements <= PLACE_LIM) {
+        bool spawn = t->update_board();
+        if (spawn && t->check_board()) {
+            t->freeze();
+            t->update_tetris();
+            t->generate();
+            t->reset_move_var();
             placements++;
         }
-        if (y == DECISION_THRESHOLD)
-            choose_moves(indiv);
-        do_move();
-        //printb(board); //<--- enable this to see the board every single time
+        if (t->y == DECISION_THRESHOLD)
+            t->choose_moves(indiv);
+        t->do_move();
     }
-    free_2darr(board);
+    t->free_2darr(t->board);
 }
 
-void print_train_info()
+void print_train_info(int id, int gen)
 {   /*
      * print:
      * - gen
@@ -139,34 +135,30 @@ int main()
     print_sample_population();
     std::cout << "..." << std::endl;
     for (int i = 0; i < TOTAL_GENERATIONS; i++) {
+        #pragma omp parallel for private(i)
         for (int j = 0; j < INIT_POPULATION; j++) {
-            id  = j;
-            gen = i;
-            lines_completed = 0; //important
-
+            int tid = omp_get_thread_num();
+            int id  = j;
+            int gen = i;
+            Tetris t;
             int score_arr[GAMES_PER_ORG];
             int score_con[GAMES_PER_ORG];
             memset(score_arr, 0, sizeof(int) * GAMES_PER_ORG);
             memset(score_con, 0, sizeof(int) * GAMES_PER_ORG);
             for (int k = 0; k < GAMES_PER_ORG; k++) {
-                place_pieces(population[id]);
-
-                score_con[k] = lines_completed;
-                score_arr[k] = lines_completed;
+                place_pieces(&t, population[id]);
+                score_con[k] = t.lines_completed;
+                score_arr[k] = t.lines_completed;
                 if (k > 0)
                     score_arr[k] = score_con[k] - score_con[k-1];
 
-                if (lines_completed <= LINE_TH)
+                if (t.lines_completed <= LINE_TH)
                     break;
             }
 
             //do cleanup after placing the pieces for this organism
-            adjust_fitness();
-            for (int k = 0; k < GAMES_PER_ORG; k++)
-                printf("%d ", score_arr[k]);
-            cout << endl;
-            print_train_info();
-
+            adjust_fitness(&t, id);
+            // print_train_info(id, gen);
             fflush(stdout);
         }
         //sort by fitness and reproduce here. introduce new genes
@@ -193,6 +185,6 @@ int main()
     print_sample_population();
     //cleanup
     free(population);
-    return 0; //TODO write a python script after to show convergence
+    return 0;
 }
 

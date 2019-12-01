@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.13)
+project(tetris)
+set(CMAKE_CXX_STANDARD 14)
+add_library (Tetris STATIC src/Tetris.cpp)
+add_library (Genetic STATIC src/genetic.cpp)
+add_executable(teste src/Teste.cpp)
+add_executable(train src/train.cpp)
+add_executable(run src/run.cpp)

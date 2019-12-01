@@ -1,7 +1,6 @@
 #ifndef train
 #define train
-#include "tetris_engine.hpp"
-
+#include "./Tetris.h"
 extern const int PLACE_LIM; //the number of block placements per game
 extern const int TOTAL_GENERATIONS;
 extern const int GAMES_PER_ORG;
@@ -9,10 +8,10 @@ extern const int GAMES_PER_ORG;
 extern int placements; //lets use this as fitness measurement
 extern short gen, id, rank;
 
-void reset_game();
-void adjust_fitness();
-void place_pieces(organism indiv);
-void print_train_info();
+void reset_game(Tetris * t);
+void adjust_fitness(Tetris * t, int id);
+void place_pieces(Tetris * t, organism indiv);
+void print_train_info(int id, int gen);
 void sort_population();
 
 #endif
