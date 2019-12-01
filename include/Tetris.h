@@ -6,9 +6,9 @@
 #define TETRIS_AI_TETRIS_H
 #include "genetic.hpp"
 
-extern const int DECISION_THRESHOLD;
-extern const int HEIGHT;
-extern const int WIDTH;
+extern int DECISION_THRESHOLD;
+extern int HEIGHT;
+extern int WIDTH;
 
 class Tetris {
     public:

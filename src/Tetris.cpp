@@ -9,9 +9,9 @@
 #include <cstdio>
 
 
-const int HEIGHT = 18;
-const int WIDTH  = 10;
-const int DECISION_THRESHOLD = 4;
+int HEIGHT = 20;
+int WIDTH  = 10;
+int DECISION_THRESHOLD = 4;
 
 void Tetris::generate()
 {

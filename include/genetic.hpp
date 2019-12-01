@@ -26,8 +26,8 @@ struct organism {                 //this is a neural network
         int fitness;
 };
 
-extern const double MUTATION_RATE;
-extern const int    INIT_POPULATION, SAMPLE_SIZE;
+extern double MUTATION_RATE;
+extern  int    INIT_POPULATION, SAMPLE_SIZE;
 extern organism     *population;
 
 

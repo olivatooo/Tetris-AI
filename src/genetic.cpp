@@ -6,9 +6,9 @@
 #include "../include/Tetris.h"
 
 using namespace std;
-const int  INIT_POPULATION = 1024, //one part reproduce, one part introduced
-               SAMPLE_SIZE = 10;
-const double MUTATION_RATE = 0.015f;
+int INIT_POPULATION = 512; //one part reproduce, one part introduced
+int SAMPLE_SIZE = 10;
+double MUTATION_RATE = 0.02f;
 
 /*
  * the above organism is a pre-trained value we are using as reference

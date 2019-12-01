@@ -6,15 +6,16 @@
 #include <omp.h>
 #include "../include/genetic.hpp"
 #include "../include/train.hpp"
+#include <unistd.h>
 
 using namespace std;
 
 organism the_best_tetris_player = (struct organism) {0, 0, 0, 0, 0, 0, 0, 0};
 
-const int PLACE_LIM         = 1000,
-          TOTAL_GENERATIONS = 5,
-          GAMES_PER_ORG     = 5,
-          LINE_TH           = 0;
+int PLACE_LIM = 1000;
+int TOTAL_GENERATIONS = 10;
+int GAMES_PER_ORG = 10;
+int LINE_TH = 0;
 
 void reset_game(Tetris * t)
 {
@@ -123,27 +124,50 @@ void reproduce()
     }
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 1)
+    {
+        cout << "Usage:" << argv[0] << " num_generations number_of_games initial_population mutation_rate" << endl;
+        cout << "Default: " << argv[0] << " " << TOTAL_GENERATIONS << " " << GAMES_PER_ORG << " " << INIT_POPULATION << " " << MUTATION_RATE << endl;
+        exit(0);
+    }
+    if(argc > 1)
+    {
+        TOTAL_GENERATIONS = atoi(argv[1]);
+    }
+    if(argc > 2)
+    {
+        GAMES_PER_ORG = atoi(argv[2]);
+    }
+    if(argc > 3)
+    {
+        INIT_POPULATION = atoi(argv[3]);
+    }
+    if(argc > 4)
+    {
+        MUTATION_RATE = atof(argv[4]);
+    }
+    cout << "Executing: " << argv[0] << " " << TOTAL_GENERATIONS << " " << GAMES_PER_ORG << " " << INIT_POPULATION << " " << MUTATION_RATE << endl;
+    cout << "Number of threads: " << omp_get_num_threads() << endl;
+    usleep(50000);
+
     srand(time(nullptr));
     init_population();
     std::cout << "OUR INIT POPULATION:" << std::endl;
     print_sample_population();
     std::cout << "..." << std::endl;
-    for (int i = 0; i < TOTAL_GENERATIONS; i++) {
-        #pragma omp parallel for private(i)
-        for (int j = 0; j < INIT_POPULATION; j++) {
-            int tid = omp_get_thread_num();
-            cout << "Processor (" << tid << ") running";
-            int id  = j;
-            int gen = i;
+    for (int generation = 0; generation < TOTAL_GENERATIONS; generation++) {
+
+        #pragma omp parallel for private(generation) schedule(dynamic)
+        for (int individual = 0; individual < INIT_POPULATION; individual++) {
             Tetris t;
             int score_arr[GAMES_PER_ORG];
             int score_con[GAMES_PER_ORG];
             memset(score_arr, 0, sizeof(int) * GAMES_PER_ORG);
             memset(score_con, 0, sizeof(int) * GAMES_PER_ORG);
             for (int k = 0; k < GAMES_PER_ORG; k++) {
-                place_pieces(&t, population[id]);
+                place_pieces(&t, population[individual]);
                 score_con[k] = t.lines_completed;
                 score_arr[k] = t.lines_completed;
                 if (k > 0)
@@ -153,30 +177,33 @@ int main()
                     break;
             }
             //do cleanup after placing the pieces for this organism
-            adjust_fitness(&t, id);
-            print_train_info(id, gen);
+            adjust_fitness(&t, individual);
+            if (individual % INIT_POPULATION == 0)
+                print_train_info(generation, individual);
             fflush(stdout);
         }
+
         //sort by fitness and reproduce here. introduce new genes
-        std::cout << std::endl << "GENERATION: " << i << std::endl;
+        std::cout << std::endl << "GENERATION: " << generation << std::endl;
         sort_population();
         print_sample_population();
         //after sort compare if we have beaten the best player
         if (population[0].fitness > the_best_tetris_player.fitness)
             the_best_tetris_player = population[0];
         reproduce();
+
+        //write params to file for future use ====>
+        organism output = the_best_tetris_player;
+        ofstream param_file; param_file.open("parameters", ios::trunc);
+        param_file << output.a << " " <<
+                   output.b << " " <<
+                   output.c << " " <<
+                   output.d << " " <<
+                   output.e << " " <<
+                   output.f << " " <<
+                   output.g << " " << "\n";
+        param_file.close();
     }
-    //write params to file for future use ====>
-    organism output = the_best_tetris_player;
-    ofstream param_file; param_file.open("parameters", ios::trunc);
-    param_file << output.a << " " <<
-                  output.b << " " <<
-                  output.c << " " <<
-                  output.d << " " <<
-                  output.e << " " <<
-                  output.f << " " <<
-                  output.g << " " << "\n";
-    param_file.close();
     //    <====
     print_sample_population();
     //cleanup

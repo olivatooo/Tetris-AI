@@ -1,9 +1,9 @@
 #ifndef train
 #define train
 #include "./Tetris.h"
-extern const int PLACE_LIM; //the number of block placements per game
-extern const int TOTAL_GENERATIONS;
-extern const int GAMES_PER_ORG;
+extern int PLACE_LIM; //the number of block placements per game
+extern int TOTAL_GENERATIONS;
+extern int GAMES_PER_ORG;
 
 extern int placements; //lets use this as fitness measurement
 extern short rank;
