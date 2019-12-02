@@ -12,7 +12,7 @@ using namespace std;
 
 organism the_best_tetris_player = (struct organism) {0, 0, 0, 0, 0, 0, 0, 0};
 
-int PLACE_LIM = 1000;
+int PLACE_LIM = 100000;
 int TOTAL_GENERATIONS = 10;
 int GAMES_PER_ORG = 10;
 int LINE_TH = 0;
@@ -100,6 +100,7 @@ void reproduce()
      * that 10% and use them to crossover a child. Once we have 33% of population
      * that has crossed over, stop. remove and regenerate the last 33%
      */
+    #pragma omp parallel for
     for(int offspring = 1; offspring < INIT_POPULATION/3 ; offspring++){   //33%
         int tenth[INIT_POPULATION / 10]; //10%
         organism par_a = (organism) {0, 0, 0, 0, 0, 0, 0, 0};
@@ -116,7 +117,10 @@ void reproduce()
         mutate(&child);
         population[offspring] = child;
     }
-    for (int i = INIT_POPULATION/3; i < INIT_POPULATION; i++) {
+    int value = INIT_POPULATION/3;
+
+    #pragma omp parallel for
+    for (int i = value; i < INIT_POPULATION; i++) {
         population[i] = (organism) {RAND, RAND, RAND, RAND,RAND, RAND, RAND, 0};
     }
 }
@@ -157,7 +161,7 @@ int main(int argc, char* argv[])
     std::cout << "..." << std::endl;
     for (int generation = 0; generation < TOTAL_GENERATIONS; generation++) {
 
-        #pragma omp parallel for private(generation) schedule(dynamic)
+        #pragma omp parallel for schedule(dynamic)
         for (int individual = 0; individual < INIT_POPULATION; individual++) {
             Tetris t;
             int score_arr[GAMES_PER_ORG];
@@ -176,8 +180,8 @@ int main(int argc, char* argv[])
             }
             //do cleanup after placing the pieces for this organism
             adjust_fitness(&t, individual);
-            if (individual % INIT_POPULATION == 0)
-                print_train_info(generation, individual);
+            if (individual % (INIT_POPULATION/5) == 0)
+                print_train_info(individual, generation);
             fflush(stdout);
         }
 
@@ -192,7 +196,8 @@ int main(int argc, char* argv[])
 
         //write params to file for future use ====>
         organism output = the_best_tetris_player;
-        ofstream param_file; param_file.open("parameters", ios::trunc);
+        ofstream param_file;
+        param_file.open("parameters", ios::trunc);
         param_file << output.a << " " <<
                    output.b << " " <<
                    output.c << " " <<
