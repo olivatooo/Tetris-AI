@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <fstream>
 #include <omp.h>
+#include <mpi.h>
 #include "../include/genetic.hpp"
 #include "../include/train.hpp"
 #include <unistd.h>
@@ -127,6 +128,7 @@ void reproduce()
 
 int main(int argc, char* argv[])
 {
+    int rank, size;
     if (argc == 1)
     {
         cout << "Usage:" << argv[0] << " num_generations number_of_games initial_population mutation_rate" << endl;
@@ -149,27 +151,65 @@ int main(int argc, char* argv[])
     {
         MUTATION_RATE = atof(argv[4]);
     }
-    cout << "Executing: " << argv[0] << " " << TOTAL_GENERATIONS << " " << GAMES_PER_ORG << " " << INIT_POPULATION << " " << MUTATION_RATE << endl;
-    cout << "Number of threads: " << omp_get_num_threads() << endl;
-    usleep(50000);
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank( MPI_COMM_WORLD, &rank );
+    MPI_Comm_size( MPI_COMM_WORLD, &size );
+    if (rank == 0) {
+        cout << "Executing: " << argv[0] << " " << TOTAL_GENERATIONS << " " << GAMES_PER_ORG << " " << INIT_POPULATION << " " << MUTATION_RATE << endl;
+        cout << "Number of threads: " << omp_get_num_threads() << endl;
+        cout << "Size: " << size << endl;
+        usleep(50000);
+    }
     srand(time(nullptr));
+    if (rank == 0) {
+        init_population();
+        std::cout << "OUR INIT POPULATION:" << std::endl;
+        print_sample_population();
+        std::cout << "..." << std::endl;
+    }
 
-    init_population();
-
-    std::cout << "OUR INIT POPULATION:" << std::endl;
-    print_sample_population();
-    std::cout << "..." << std::endl;
+    MPI_Datatype dt_organism;
+    MPI_Datatype types[8] = {
+        MPI_FLOAT,
+        MPI_FLOAT,
+        MPI_FLOAT,
+        MPI_FLOAT,
+        MPI_FLOAT,
+        MPI_FLOAT,
+        MPI_FLOAT,
+        MPI_INT
+    };
+    MPI_Aint displacements[8]  = {
+        offsetof(organism, a),
+        offsetof(organism, b),
+        offsetof(organism, c),
+        offsetof(organism, d),
+        offsetof(organism, e),
+        offsetof(organism, f),
+        offsetof(organism, g),
+        offsetof(organism, fitness)
+    };
+    int block_lenth[8] = {1,1,1,1,1,1,1,1};
+    MPI_Type_create_struct(8, block_lenth, displacements, types, &dt_organism);
+    MPI_Type_commit(&dt_organism);
+    
     for (int generation = 0; generation < TOTAL_GENERATIONS; generation++) {
 
+        organism *divided_individuals = (organism*)malloc((INIT_POPULATION/size)*sizeof(organism));
+
+        MPI_Scatter(population, INIT_POPULATION/size,
+            dt_organism, divided_individuals, INIT_POPULATION/size,
+            dt_organism, 0, MPI_COMM_WORLD);
+
         #pragma omp parallel for schedule(dynamic)
-        for (int individual = 0; individual < INIT_POPULATION; individual++) {
+        for (int individual = 0; individual < INIT_POPULATION/size; individual++) {
             Tetris t;
             int score_arr[GAMES_PER_ORG];
             int score_con[GAMES_PER_ORG];
             memset(score_arr, 0, sizeof(int) * GAMES_PER_ORG);
             memset(score_con, 0, sizeof(int) * GAMES_PER_ORG);
             for (int k = 0; k < GAMES_PER_ORG; k++) {
-                place_pieces(&t, population[individual]);
+                place_pieces(&t, divided_individuals[individual]);
                 score_con[k] = t.lines_completed;
                 score_arr[k] = t.lines_completed;
                 if (k > 0)
@@ -179,38 +219,52 @@ int main(int argc, char* argv[])
                     break;
             }
             //do cleanup after placing the pieces for this organism
-            adjust_fitness(&t, individual);
-            if (individual % (INIT_POPULATION/5) == 0)
-                print_train_info(individual, generation);
-            fflush(stdout);
+            divided_individuals[individual].fitness = t.lines_completed;
+            // if (individual % (INIT_POPULATION/5) == 0)
+            //     print_train_info(individual, generation);
+            // fflush(stdout);
         }
 
-        //sort by fitness and reproduce here. introduce new genes
-        std::cout << std::endl << "GENERATION: " << generation << std::endl;
-        sort_population();
-        print_sample_population();
-        //after sort compare if we have beaten the best player
-        if (population[0].fitness > the_best_tetris_player.fitness)
-            the_best_tetris_player = population[0];
-        reproduce();
+        MPI_Gather(divided_individuals, INIT_POPULATION/size,
+            dt_organism, population, INIT_POPULATION/size,
+            dt_organism, 0, MPI_COMM_WORLD);
 
-        //write params to file for future use ====>
-        organism output = the_best_tetris_player;
-        ofstream param_file;
-        param_file.open("parameters", ios::trunc);
-        param_file << output.a << " " <<
-                   output.b << " " <<
-                   output.c << " " <<
-                   output.d << " " <<
-                   output.e << " " <<
-                   output.f << " " <<
-                   output.g << " " << "\n";
-        param_file.close();
+        free(divided_individuals);
+
+        if (rank == 0) {
+            //sort by fitness and reproduce here. introduce new genes
+            std::cout << std::endl << "GENERATION: " << generation << std::endl;
+            sort_population();
+            print_sample_population();
+            //after sort compare if we have beaten the best player
+            if (population[0].fitness > the_best_tetris_player.fitness)
+                the_best_tetris_player = population[0];
+            reproduce();
+            
+
+            //write params to file for future use ====>
+            organism output = the_best_tetris_player;
+            ofstream param_file;
+            param_file.open("parameters", ios::trunc);
+            param_file << output.a << " " <<
+                    output.b << " " <<
+                    output.c << " " <<
+                    output.d << " " <<
+                    output.e << " " <<
+                    output.f << " " <<
+                    output.g << " " << "\n";
+            param_file.close();
+        }
     }
     //    <====
-    print_sample_population();
+
+    
     //cleanup
-    free(population);
+    if (rank == 0) {
+        // print_sample_population(); 
+        free(population);
+    }
+    MPI_Finalize();
     return 0;
 }
 

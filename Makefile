@@ -14,3 +14,7 @@ run:
 
 tune:
 	g++ src/tune_ai.cpp src/genetic.cpp src/tetris_engine.c src/train.cpp -o bin/tune
+
+train-wombo-combo:
+	mpiCC src/train.cpp src/Tetris.cpp src/genetic.cpp -o bin/train-wombo-combo -fopenmp
+
