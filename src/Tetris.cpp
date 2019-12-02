@@ -9,7 +9,7 @@
 #include <cstdio>
 
 
-int HEIGHT = 20;
+int HEIGHT = 28;
 int WIDTH  = 10;
 int DECISION_THRESHOLD = 4;
 

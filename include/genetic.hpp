@@ -2,6 +2,7 @@
 #define genetic
 
 #define RAND (((double) rand() / RAND_MAX) * 2 - 1) //between -1 and 1
+#define RAND_0 ((double) rand() / RAND_MAX)
 
 /*
  * so the way we set up the genetic algorithm is by optimizing a penalty calculater,
@@ -21,7 +22,7 @@
  */
 
 typedef struct organism organism;
-struct organism {                 //this is a neural network
+struct organism {
         double a, b, c, d, e, f, g;
         int fitness;
 };

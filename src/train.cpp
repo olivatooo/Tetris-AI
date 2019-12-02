@@ -100,8 +100,7 @@ void reproduce()
      * that 10% and use them to crossover a child. Once we have 33% of population
      * that has crossed over, stop. remove and regenerate the last 33%
      */
-    int offspring = 0;
-    while (offspring < INIT_POPULATION/3) {   //33%
+    for(int offspring = 1; offspring < INIT_POPULATION/3 ; offspring++){   //33%
         int tenth[INIT_POPULATION / 10]; //10%
         organism par_a = (organism) {0, 0, 0, 0, 0, 0, 0, 0};
         organism par_b = (organism) {0, 0, 0, 0, 0, 0, 0, 0};
@@ -115,12 +114,10 @@ void reproduce()
         }
         weighted_crossover(par_a, par_b, &child);
         mutate(&child);
-        offspring++;
         population[offspring] = child;
     }
     for (int i = INIT_POPULATION/3; i < INIT_POPULATION; i++) {
-        population[i] = (organism) {RAND, RAND, RAND, RAND,
-                RAND, RAND, RAND, 0};
+        population[i] = (organism) {RAND, RAND, RAND, RAND,RAND, RAND, RAND, 0};
     }
 }
 
@@ -151,9 +148,10 @@ int main(int argc, char* argv[])
     cout << "Executing: " << argv[0] << " " << TOTAL_GENERATIONS << " " << GAMES_PER_ORG << " " << INIT_POPULATION << " " << MUTATION_RATE << endl;
     cout << "Number of threads: " << omp_get_num_threads() << endl;
     usleep(50000);
-
     srand(time(nullptr));
+
     init_population();
+
     std::cout << "OUR INIT POPULATION:" << std::endl;
     print_sample_population();
     std::cout << "..." << std::endl;

@@ -55,13 +55,16 @@ void weighted_crossover(const organism p1, const organism p2, organism *child)
 
 void mutate(organism *child)
 {
-    child->a += (RAND * MUTATION_RATE) * child->a;
-    child->b += (RAND * MUTATION_RATE) * child->b;
-    child->c += (RAND * MUTATION_RATE) * child->c;
-    child->d += (RAND * MUTATION_RATE) * child->d;
-    child->e += (RAND * MUTATION_RATE) * child->e;
-    child->f += (RAND * MUTATION_RATE) * child->f;
-    child->g += (RAND * MUTATION_RATE) * child->g;
+    int MUTATION_WEIGHT = 1;
+    if(RAND_0 <= MUTATION_RATE) {
+        child->a += (RAND * MUTATION_WEIGHT) * child->a;
+        child->b += (RAND * MUTATION_WEIGHT) * child->b;
+        child->c += (RAND * MUTATION_WEIGHT) * child->c;
+        child->d += (RAND * MUTATION_WEIGHT) * child->d;
+        child->e += (RAND * MUTATION_WEIGHT) * child->e;
+        child->f += (RAND * MUTATION_WEIGHT) * child->f;
+        child->g += (RAND * MUTATION_WEIGHT) * child->g;
+    }
 }
 
 //===== here begins the penalty calculations for the individual
